@@ -211,27 +211,32 @@ tasks:
 
 ## Optional: Database
 
-The fastest way to get a database is with the built-in Neon integration:
+Track task results across runs with a free PostgreSQL database. The quickest setup is one command:
 
 ```bash
 pip install "autowebprompt[storage]"
-
-# Provision a free Neon PostgreSQL database (interactive)
 autowebprompt db init
-
-# Or with flags
-autowebprompt db init --api-key neon_key_abc123 --name my-project --region aws-us-east-2
 ```
 
-This creates a free-tier Neon database, runs the schema migration, and saves `DATABASE_URL` to `.env.local`. You can also point to any existing PostgreSQL:
+This will:
+1. Ask for your [Neon API key](https://console.neon.tech/app/settings/api-keys) (free tier works)
+2. Create a database and run the schema migration
+3. Save the connection string to `.env.local`
+
+Already have a Neon key? Pass it directly:
 
 ```bash
-export DATABASE_URL=postgresql://user:pass@host:5432/dbname
-autowebprompt db migrate
-autowebprompt db status
+autowebprompt db init --api-key <your-key>
 ```
 
-Use `--dry-run` to preview migration SQL without a database:
+Already have any PostgreSQL database? Skip Neon entirely:
+
+```bash
+autowebprompt db migrate --database-url <your-connection-string>
+autowebprompt db status  --database-url <your-connection-string>
+```
+
+Preview the migration SQL without touching a database:
 
 ```bash
 autowebprompt db migrate --dry-run
