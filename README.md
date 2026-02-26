@@ -123,6 +123,9 @@ autowebprompt setup       # Interactive setup wizard
 autowebprompt run         # Run batch tasks
 autowebprompt check       # Verify Chrome CDP is running
 autowebprompt templates   # Show template examples
+autowebprompt db init     # Provision a free Neon PostgreSQL database
+autowebprompt db migrate  # Run schema migration
+autowebprompt db status   # Show connection and table status
 ```
 
 ### `run` Options
@@ -176,6 +179,34 @@ task_source: "my_project"
 tasks:
   - "task-1-analysis"
   - "task-2-modeling"
+```
+
+## Optional: Database
+
+The fastest way to get a database is with the built-in Neon integration:
+
+```bash
+pip install "autowebprompt[storage]"
+
+# Provision a free Neon PostgreSQL database (interactive)
+autowebprompt db init
+
+# Or with flags
+autowebprompt db init --api-key neon_key_abc123 --name my-project --region aws-us-east-2
+```
+
+This creates a free-tier Neon database, runs the schema migration, and saves `DATABASE_URL` to `.env.local`. You can also point to any existing PostgreSQL:
+
+```bash
+export DATABASE_URL=postgresql://user:pass@host:5432/dbname
+autowebprompt db migrate
+autowebprompt db status
+```
+
+Use `--dry-run` to preview migration SQL without a database:
+
+```bash
+autowebprompt db migrate --dry-run
 ```
 
 ## Optional: Cloud Storage

@@ -102,6 +102,10 @@ def check(port):
     click.echo("\nReady for automation!")
 
 
+from autowebprompt.cli.db import db as db_group
+cli.add_command(db_group)
+
+
 @cli.command()
 def templates():
     """Show example template configurations."""

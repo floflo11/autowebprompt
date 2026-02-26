@@ -35,6 +35,7 @@ storage = [
     "sqlalchemy>=2.0.0",
     "boto3>=1.26.0",
     "psycopg2-binary>=2.9.0",
+    "httpx>=0.27.0",
 ]
 dev = [
     "pytest>=7.4.0",
