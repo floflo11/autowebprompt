@@ -4,33 +4,45 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Playwright](https://img.shields.io/badge/Playwright-1.40+-green.svg)](https://playwright.dev/python/)
 
-**Automate ChatGPT and Claude web UIs with Playwright.** Send prompts, upload files, download artifacts, and run batch tasks — all through the browser you're already logged into.
+**Drive ChatGPT and Claude like a real user — from the command line.**
 
-## Why?
+Some of the best AI features only exist in the browser: ChatGPT Agent Mode, Claude Extended Thinking, file uploads, artifact downloads. `autowebprompt` gives you programmatic access to all of it by automating a real Chrome session via Playwright and CDP.
 
-AI providers offer powerful web-only features (ChatGPT Agent Mode, Claude Extended Thinking) that aren't available via API. This tool lets you automate those features programmatically by driving a real browser session.
-
-## How It Works
+Send prompts, upload spreadsheets, download results, run hundreds of tasks in batch — then optionally pipe everything to S3 and PostgreSQL. One `pip install`, one command.
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  autowebprompt                                      │
-│                                                     │
-│  CLI / BatchRunner                                  │
-│       │                                             │
-│       ▼                                             │
-│  EngineRunner (per-task lifecycle)                   │
-│       │                                             │
-│       ├── ClaudeWebAgent    (claude.ai)             │
-│       └── ChatGPTWebAgent   (chatgpt.com)           │
-│              │                                      │
-│              ▼                                      │
-│  BrowserManager ──► Chrome CDP (port 9222)          │
-│                      Your logged-in browser         │
-│                                                     │
-│  Optional: S3 upload, PostgreSQL logging            │
-└─────────────────────────────────────────────────────┘
+You                    autowebprompt               Chrome (CDP)
+ |                          |                          |
+ |  autowebprompt run ...   |                          |
+ |------------------------->|                          |
+ |                          |   navigate, upload,      |
+ |                          |   send prompts, wait,    |
+ |                          |   download artifacts     |
+ |                          |------------------------->|
+ |                          |                          |  chatgpt.com
+ |                          |                          |  or claude.ai
+ |                          |<-------------------------|
+ |  results + artifacts     |                          |
+ |<-------------------------|                          |
 ```
+
+---
+
+## Prerequisites
+
+Before you start, you'll need:
+
+| Requirement | Details |
+|-------------|---------|
+| **Python** | 3.10 or newer |
+| **Google Chrome** | Chrome or Chrome Canary (for CDP remote debugging) |
+| **Playwright** | Installed automatically; run `playwright install chromium` after install |
+| **ChatGPT subscription** | **Plus** ($20/mo) or **Pro** ($200/mo) — required for Agent Mode and extended thinking |
+| **Claude subscription** | **Pro** ($20/mo) or **Max** ($100–200/mo) — required for extended thinking and higher rate limits |
+
+> **Usage policy.** This tool automates your own logged-in browser session on your own machine. You are responsible for using it in compliance with [OpenAI's Terms of Use](https://openai.com/policies/terms-of-use) and [Anthropic's Acceptable Use Policy](https://www.anthropic.com/legal/aup). Automated access may be subject to rate limits or additional restrictions under those agreements. Use responsibly.
+
+---
 
 ## Quick Start
 
@@ -38,12 +50,13 @@ AI providers offer powerful web-only features (ChatGPT Agent Mode, Claude Extend
 
 ```bash
 pip install autowebprompt
+playwright install chromium
 ```
 
 Or from source:
 
 ```bash
-git clone https://github.com/your-org/autowebprompt.git
+git clone https://github.com/NewYorkAILabs/autowebprompt.git
 cd autowebprompt
 pip install -e ".[dev]"
 playwright install chromium
@@ -56,9 +69,13 @@ playwright install chromium
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
   --remote-debugging-port=9222 \
   --user-data-dir=~/.autowebprompt-chrome-profile
+
+# Linux
+google-chrome --remote-debugging-port=9222 \
+  --user-data-dir=~/.autowebprompt-chrome-profile
 ```
 
-Log into ChatGPT or Claude in that browser window.
+Log into **ChatGPT** or **Claude** in that browser window.
 
 ### 3. Run the Setup Wizard
 
@@ -66,11 +83,11 @@ Log into ChatGPT or Claude in that browser window.
 autowebprompt setup
 ```
 
-This copies a template config and example task file to your project.
+This copies a starter template and example task file into your project.
 
 ### 4. Configure
 
-Edit the template to set your project ID:
+Edit the template to set your project ID and prompts:
 
 ```yaml
 # template_chatgpt.yaml
@@ -91,15 +108,20 @@ template:
 ### 5. Run
 
 ```bash
-# Single provider
+# ChatGPT
 autowebprompt run --provider chatgpt \
   --tasks tasks.yaml --template template_chatgpt.yaml
 
-# With database task fetching
+# Claude
 autowebprompt run --provider claude \
-  --tasks tasks.yaml --template template_claude.yaml \
-  --fetch-from-db
+  --tasks tasks.yaml --template template_claude.yaml
+
+# With database task fetching
+autowebprompt run --provider chatgpt \
+  --tasks tasks.yaml --fetch-from-db
 ```
+
+---
 
 ## Features
 
@@ -109,12 +131,14 @@ autowebprompt run --provider claude \
 | Upload files | Yes | Yes |
 | Download artifacts | Yes | Yes (CDP) |
 | Extended thinking | Yes | Yes |
-| Agent mode | - | Yes |
-| Web search | Yes | - |
+| Agent mode | — | Yes |
+| Web search | Yes | Yes |
 | Batch execution | Yes | Yes |
 | Retry on failure | Yes | Yes |
 | S3 upload (optional) | Yes | Yes |
 | DB logging (optional) | Yes | Yes |
+
+---
 
 ## CLI Commands
 
@@ -139,6 +163,8 @@ autowebprompt db status   # Show connection and table status
 | `--dry-run` | Preview without executing |
 | `--start` / `--end` | Task index range |
 | `--timeout` | Per-task timeout in seconds |
+
+---
 
 ## Configuration
 
@@ -180,6 +206,8 @@ tasks:
   - "task-1-analysis"
   - "task-2-modeling"
 ```
+
+---
 
 ## Optional: Database
 
@@ -226,13 +254,33 @@ export AWS_S3_BUCKET=my-bucket
 export DATABASE_URL=postgresql://...
 ```
 
+---
+
 ## Architecture
 
-The package uses a strategy pattern with a shared engine:
+```
+┌─────────────────────────────────────────────────────┐
+│  autowebprompt                                      │
+│                                                     │
+│  CLI / BatchRunner                                  │
+│       │                                             │
+│       ▼                                             │
+│  EngineRunner (per-task lifecycle)                   │
+│       │                                             │
+│       ├── ClaudeWebAgent    (claude.ai)             │
+│       └── ChatGPTWebAgent   (chatgpt.com)           │
+│              │                                      │
+│              ▼                                      │
+│  BrowserManager ──► Chrome CDP (port 9222)          │
+│                      Your logged-in browser         │
+│                                                     │
+│  Optional: S3 upload, PostgreSQL logging            │
+└─────────────────────────────────────────────────────┘
+```
 
 - **`WebAgent` (ABC)** — abstract base with 9 lifecycle methods
 - **`ClaudeWebAgent`** — drives claude.ai (extended thinking, web search)
-- **`ChatGPTWebAgent`** — drives chatgpt.com (agent mode, Code Interpreter)
+- **`ChatGPTWebAgent`** — drives chatgpt.com (agent mode, web search, Code Interpreter)
 - **`EngineRunner`** — two-tier retry loop (pipeline + agent phases)
 - **`BatchRunner`** — sequential task execution from YAML configs
 - **`BrowserManager`** — Chrome CDP connection management
@@ -246,12 +294,7 @@ The engine uses a two-tier retry loop:
 
 Pipeline failures restart the entire browser session. Agent failures retry from the prompt step within the same session.
 
-## Prerequisites
-
-- Python 3.10+
-- Google Chrome or Chrome Canary
-- A ChatGPT Plus/Pro or Claude Pro account
-- Playwright (`pip install playwright && playwright install chromium`)
+---
 
 ## License
 
