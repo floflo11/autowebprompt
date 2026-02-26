@@ -1,0 +1,9 @@
+# autowebprompt — Example Tasks File
+# List the tasks you want to run. Each task needs a name and source.
+
+task_source: "my_project"
+
+tasks:
+  - "task-1-analysis"
+  - "task-2-modeling"
+  - "task-3-summary"

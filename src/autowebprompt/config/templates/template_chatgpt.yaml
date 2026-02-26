@@ -1,0 +1,52 @@
+# autowebprompt — ChatGPT Template
+# Copy this file and fill in your project details.
+
+template:
+  agent_type: "chatgpt_web"
+  download_artifacts: true
+  upload_to_cloud: false  # Set true to enable S3/DB upload
+
+  prompts:
+    - "Your prompt here. ChatGPT agent mode will use Code Interpreter to process files."
+
+  chatgpt_web:
+    # Get your project ID from the ChatGPT project URL:
+    # https://chatgpt.com/g/g-p-YOUR_PROJECT_ID-your-project/project
+    project_id: "YOUR_CHATGPT_PROJECT_ID"
+    project_slug: "your-project-name"
+
+    # Features
+    agent_mode: true               # Enable Code Interpreter for file processing
+    extended_thinking: true         # Enable extended thinking (Pro plan)
+
+    # Timing
+    max_sec_per_task: 5400          # 90 minutes total
+    max_wait_per_prompt_seconds: 5400  # Agent mode tasks can take 30+ min
+    check_interval_seconds: 3
+
+    # Browser
+    browser:
+      type: "chrome"                 # chrome, chrome_canary, chromium
+      headless: false
+      timeout: 30000                 # 30 seconds
+      cdp_port: 9222
+
+    # Retry policy
+    retry:
+      max_agent_attempts: 3
+      max_total_attempts: 10
+      max_sec_per_attempt: 5400
+      sleep_between_retries: 5
+
+    # Output
+    output:
+      folder_prefix: "chatgptGUI"
+
+    # Logging
+    logging:
+      level: "INFO"
+      save_to_file: true
+      log_directory: "chatgpt_web_logs"
+
+    runtime:
+      no_hold: true

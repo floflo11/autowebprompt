@@ -1,0 +1,51 @@
+# autowebprompt — Claude.ai Template
+# Copy this file and fill in your project details.
+
+template:
+  agent_type: "claude_web"
+  download_artifacts: true
+  upload_to_cloud: false  # Set true to enable S3/DB upload
+
+  prompts:
+    - "Your prompt here. You can use multiple prompts in sequence."
+
+  claude_web:
+    # Get your project ID from the Claude.ai project URL:
+    # https://claude.ai/project/YOUR_PROJECT_ID
+    project_id: "YOUR_CLAUDE_PROJECT_ID"
+
+    # Features
+    enable_extended_thinking: true
+    enable_web_search: true
+
+    # Timing
+    max_sec_per_task: 5400          # 90 minutes total
+    max_wait_per_prompt_seconds: 1800  # 30 minutes per prompt
+    check_interval_seconds: 2
+
+    # Browser
+    browser:
+      type: "chrome"                 # chrome, chrome_canary, chromium
+      headless: false
+      timeout: 30000                 # 30 seconds
+      cdp_port: 9222
+
+    # Retry policy
+    retry:
+      max_agent_attempts: 3
+      max_total_attempts: 10
+      max_sec_per_attempt: 1800
+      sleep_between_retries: 5
+
+    # Output
+    output:
+      folder_prefix: "claudeGUI"
+
+    # Logging
+    logging:
+      level: "INFO"
+      save_to_file: true
+      log_directory: "claude_web_logs"
+
+    runtime:
+      no_hold: true

@@ -1,0 +1,65 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "autowebprompt"
+version = "0.1.0"
+description = "Automate ChatGPT and Claude web UIs with Playwright — send prompts, upload files, download artifacts"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "New York AI Labs" }]
+keywords = ["chatgpt", "claude", "automation", "playwright", "web-agent", "llm", "browser-automation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "playwright>=1.54.0",
+    "pyyaml>=6.0.2",
+    "python-dotenv>=1.0.0",
+    "click>=8.0.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+storage = [
+    "sqlalchemy>=2.0.0",
+    "boto3>=1.26.0",
+    "psycopg2-binary>=2.9.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+]
+all = [
+    "autowebprompt[storage,dev]",
+]
+
+[project.scripts]
+autowebprompt = "autowebprompt.cli.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/NewYorkAILabs/autowebprompt"
+Repository = "https://github.com/NewYorkAILabs/autowebprompt"
+Issues = "https://github.com/NewYorkAILabs/autowebprompt/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/autowebprompt"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

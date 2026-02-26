@@ -1,0 +1,42 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment
+.env
+.env.local
+.venv/
+venv/
+
+# Logs
+*.log
+chatgpt_web_logs/
+claude_web_logs/
+
+# Output directories
+artifacts/
+solutions/
+20*_chatgptGUI*/
+20*_claudeGUI*/
+
+# Chrome profiles
+.chrome-*/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
